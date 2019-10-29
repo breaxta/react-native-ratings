@@ -45,7 +45,6 @@ export default class SwipeRating extends Component {
     ratingBackgroundColor: 'white',
     ratingCount: 5,
     imageSize: 40,
-    onFinishRating: () => console.log('Attach a onFinishRating function here.'),
     minValue: 0
   };
 
@@ -73,7 +72,7 @@ export default class SwipeRating extends Component {
             // 'round up' to the nearest rating image
             this.setCurrentRating(rating);
           }
-          onFinishRating(rating);
+          if (typeof onFinishRating === 'function') onFinishRating(rating);
         }
       }
     });
@@ -96,9 +95,9 @@ export default class SwipeRating extends Component {
     this.setCurrentRating(this.props.startingValue);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.startingValue !== this.props.startingValue) {
-      this.setCurrentRating(nextProps.startingValue);
+  componentDidUpdate(prevProps) {
+    if (this.props.startingValue !== prevProps.startingValue) {
+      this.setCurrentRating(this.props.startingValue);
     }
   }
 
@@ -166,13 +165,13 @@ export default class SwipeRating extends Component {
     const { fractions, imageSize, ratingCount } = this.props;
 
     const startingValue = ratingCount / 2;
-    let currentRating = 0;
+    let currentRating = (this.props.minValue) ? this.props.minValue : 0;
 
     if (value > (ratingCount * imageSize) / 2) {
       currentRating = ratingCount;
     } else if (value < (-ratingCount * imageSize) / 2) {
-      currentRating = 0;
-    } else if (value < imageSize || value > imageSize) {
+      currentRating = (this.props.minValue) ? this.props.minValue : 0;
+    } else if (value <= imageSize || value > imageSize) {
       currentRating = startingValue + value / imageSize;
       currentRating = !fractions ? Math.ceil(currentRating) : +currentRating.toFixed(fractions);
     } else {
